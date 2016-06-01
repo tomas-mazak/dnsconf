@@ -20,7 +20,7 @@ class ZoneParser(object):
         'DHCID', 'DLV', 'DNAME', 'DNSKEY', 'DS', 'HIP', 'IPSECKEY', 'KEY',
         'KX', 'LOC', 'MX', 'NAPTR', 'NS', 'NSEC', 'NSEC3', 'NSEC3PARAM', 'PTR',
         'RRSIG', 'RP', 'SIG', 'SOA', 'SRV', 'SSHFP', 'TA', 'TKEY', 'TLSA',
-        'TSIG', 'TXT'
+        'TSIG', 'TXT', 'SPF'
     )
 
 
