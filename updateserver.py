@@ -10,7 +10,7 @@
 
 
 import os, hashlib, jinja2
-import git, dnslib, config
+import dnslib, config
 
 
 def sha1(txt):
@@ -20,9 +20,8 @@ def sha1(txt):
 
 
 if __name__ == '__main__':
-
-    # ensure this script is executed from the root directory of current repo
-    os.chdir(git.toplevel())
+    basedir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..')
+    os.chdir(basedir)
 
     # compute checksum of original config file
     try:
@@ -32,16 +31,16 @@ if __name__ == '__main__':
         checksum_orig = ''
 
     # generate new configuration
-    env = jinja2.Environment(loader=jinja2.FileSystemLoader(git.toplevel()))
+    env = jinja2.Environment(loader=jinja2.FileSystemLoader(basedir))
     template = env.get_template(config.CONFIG_TEMPLATE)
-    zones = [ {'name': z, 'zonefile': os.path.abspath(z)} for z in sorted(os.listdir(config.ZONEDIR)) ]
+    zones = [ {'name': z, 'zonefile': os.path.abspath(os.path.join(config.ZONEDIR, z))} for z in sorted(os.listdir(config.ZONEDIR)) ]
     new_config = template.render(zones=zones)
     checksum_new = sha1(new_config)
 
     # test if the new config differs from original: if so, reload dns server
     if checksum_new != checksum_orig:
         with open(config.CONFIG_FILE, 'w') as f:
-            f.write(cnf)
+            f.write(new_config)
         print "Config file changed, reloading dns server..."
         dnslib.server_reload()
     else:
