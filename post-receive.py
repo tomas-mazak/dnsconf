@@ -9,14 +9,17 @@
 #
 
 
-import subprocess
+import os, subprocess
 import config
 
 
 def notify_local(command):
     cmd = [command]
+    clean_env = {k: os.environ[k] for k in os.environ 
+                                  if not k.startswith('GIT_')}
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE,
-                                 stderr=subprocess.PIPE)
+                                 stderr=subprocess.PIPE,
+                                 env=clean_env)
     (stdout, stderr) = proc.communicate()
     if proc.wait() != 0:
         raise RuntimeError(stdout + '\n' + stderr)
