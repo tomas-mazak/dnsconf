@@ -7,7 +7,7 @@
 #
 
 
-import os, tempfile, subprocess, datetime
+import os, tempfile, subprocess, datetime, jinja2
 import git, zoneparser, config
 
 
@@ -31,8 +31,14 @@ def get_staged_zonefiles():
     """
     Get the list of zones modified in index (staged)
     """
-    zdir = os.path.join(config.ZONEDIR,'')
-    return [(sha1, f) for (sha1, f) in git.staged_files() if f.startswith(zdir)]
+    return git.staged_files(subtree=config.ZONEDIR)
+
+
+def get_all_index_zonefiles():
+    """
+    Get the list of all zonefiles that exist in index
+    """
+    return git.files_in_index(subtree=config.ZONEDIR)
 
 
 def check_zone(name, zone_txt):
@@ -109,3 +115,25 @@ def update_serial(fname, zone_txt, serial=None):
     new_txt = zone_txt[:pos] + str(serial) + zone_txt[pos+len(str(toreplace)):]
 
     return (new_txt, serial)
+
+
+def _update_conf(template, dest, zones):
+    env = jinja2.Environment(loader=jinja2.FileSystemLoader('.'))
+
+    # master
+    template = env.get_template(template)
+    zones = [ {'name': z[len(config.ZONEDIR)+1:], 'file': z} for z in sorted(zones) ]
+    conf_txt = template.render(zones=zones)
+    with open(dest, 'w') as fd:
+        fd.write(conf_txt)
+
+
+def update_namedconf(zones, stage=False):
+    """
+    Regenerate server configs from templates
+    """
+    _update_conf(config.NAMEDCONF_MASTER_TPL, config.NAMEDCONF_MASTER, zones)
+    _update_conf(config.NAMEDCONF_SLAVE_TPL, config.NAMEDCONF_SLAVE, zones)
+    if stage:
+        git.stage_file(config.NAMEDCONF_MASTER)
+        git.stage_file(config.NAMEDCONF_SLAVE)

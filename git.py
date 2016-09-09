@@ -25,6 +25,18 @@ def _git(cmd, stdin=None):
     return stdout
 
 
+def _head_rev():
+    """
+    In a new git repo, the HEAD reference is not yet set. In this case,
+    use an empty tree object (e.g. to evaulate diffs against)
+    """
+    try:
+        _git('rev-parse --verify HEAD')
+        return 'HEAD'
+    except RuntimeError:
+        return '4b825dc642cb6eb9a060e54bf8d69288fbee4904'
+
+
 def toplevel():
     """
     Get the toplevel directory of the current git repo
@@ -61,6 +73,13 @@ def update_index(filename, new_content):
     _git('update-index --cacheinfo 10644,%s,%s' % (new_sha, filename))
 
 
+def stage_file(filename):
+    """
+    Add working tree version of a file into an index (git add)
+    """
+    _git('add -- %s' % filename)
+
+
 def head_version(filename):
     """
     Get the content of a file from HEAD revision
@@ -73,24 +92,25 @@ def head_version(filename):
     return content
 
 
-def staged_files():
+def staged_files(diff_filter='AMCR', subtree='.'):
     """
     Get regular files that are added, modified, copied or renamed in index.
     Ignore executable files, symlinks, etc.
     """
-    try:
-        _git('rev-parse --verify HEAD')
-        rev = 'HEAD'
-    except RuntimeError:
-        # In a new git repo, the HEAD reference is not set yet. In this case,
-        # use an empty tree object to evaulate diffs against.
-        rev = '4b825dc642cb6eb9a060e54bf8d69288fbee4904'
-
-    output = _git('diff-index --cached --diff-filter=AMCR %s' % rev)
+    output = _git('diff-index --cached --diff-filter=%s %s -- %s' % \
+                  (diff_filter, _head_rev(), subtree))
     files = [f.split(' ') for f in output.strip().split('\n')]
 
     return [ (f[3], f[4].split('\t')[-1]) for f in files
              if len(f)>1 and f[1] == '100644' ]
+
+
+def files_in_index(subtree='.'):
+    """
+    Get list of all files that exist in index (i.e. do not list new files in
+    working tree not yet staged)
+    """
+    return _git('ls-files -- %s' % subtree).strip().split('\n')
 
 
 def changed_files(old, new):

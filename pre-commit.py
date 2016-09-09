@@ -35,6 +35,7 @@ if __name__ == '__main__':
     if config.AUTOINCREMENT_SERIAL:
         for (sha1, fname) in modified:
             # update index
+            zone_txt = git.content_by_sha1(sha1)
             (zone_txt, serial) = dnslib.update_serial(fname, zone_txt)
             git.update_index(fname, zone_txt)
 
@@ -44,3 +45,7 @@ if __name__ == '__main__':
             (zone_txt, serial) = dnslib.update_serial(fname, zone_txt, serial)
             with open(fname, 'w') as fd:
                 fd.write(zone_txt)
+
+    if config.UPDATE_NAMEDCONF:
+        zones = dnslib.get_all_index_zonefiles()
+        dnslib.update_namedconf(zones, stage=True)
