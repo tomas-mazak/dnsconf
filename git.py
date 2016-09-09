@@ -44,6 +44,20 @@ def toplevel():
     return _git('rev-parse --show-toplevel').strip()
 
 
+def fetch():
+    """
+    Git fetch
+    """
+    return _git('fetch')
+
+
+def pull():
+    """
+    Git pull
+    """
+    return _git('pull')
+
+
 def content_by_sha1(sha1):
     """
     Get the contents of a blob object from the git repo
@@ -113,11 +127,11 @@ def files_in_index(subtree='.'):
     return _git('ls-files -- %s' % subtree).strip().split('\n')
 
 
-def changed_files(old, new):
+def changed_files(old, new, subtree='.'):
     """
     Get a list of files modified between the two given commits
     """
-    output = _git('diff --name-only %s..%s' % (old, new))
+    output = _git('diff --name-only %s..%s -- %s' % (old, new, subtree))
     files = output.strip().split('\n')
 
     return files

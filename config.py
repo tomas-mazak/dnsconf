@@ -54,6 +54,7 @@ cfg = parser.as_dict()
 # [common]
 common = cfg.get('common', {})
 ZONEDIR = common.get('zonefile_directory', 'zones')
+REMOTE_REF = common.get('remote_ref', 'refs/remotes/origin/master')
 DEPLOY_REF = common.get('deploy_ref', 'refs/heads/master')
 NAMEDCONF_MASTER = common.get('namedconf_master', None)
 NAMEDCONF_SLAVE = common.get('namedconf_slave', None)
@@ -69,6 +70,8 @@ NAMEDCONF_SLAVE_TPL = client.get('namedconf_slave_tpl', None)
 #NOTIFY_SERVERS = [ x.strip() for x in cfg.get('remote', 'notify_servers').split(',') ]
 
 # [server]
+server = cfg.get('server', {})
+SERVER_REPO_DIR = server.get('repo_dir', None)
 #SERVERTYPE = cfg.get('server', 'server_type')
 #CONFIG_TEMPLATE = cfg.get('server', 'config_template')
 #CONFIG_FILE = cfg.get('server', 'config_file')
