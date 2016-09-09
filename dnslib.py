@@ -123,7 +123,9 @@ def _update_conf(template, dest, zones):
 
     # master
     template = env.get_template(template)
-    zones = [ {'name': z[len(config.ZONEDIR)+1:], 'file': z} for z in sorted(zones) ]
+    zones = [ {'name': z[len(config.ZONEDIR)+1:], 
+               'file': os.path.join(config.SERVER_REPO_DIR, z)}
+              for z in sorted(zones) ]
     conf_txt = template.render(zones=zones)
     with open(dest, 'w') as fd:
         fd.write(conf_txt)
