@@ -67,7 +67,9 @@ NAMEDCONF_MASTER_TPL = client.get('namedconf_master_tpl', None)
 NAMEDCONF_SLAVE_TPL = client.get('namedconf_slave_tpl', None)
 
 # [remote]
-#NOTIFY_SERVERS = [ x.strip() for x in cfg.get('remote', 'notify_servers').split(',') ]
+remote = cfg.get('remote', {})
+NOTIFY_SERVERS = [ x.strip() for x in remote.get('notify_servers', '').split(',') 
+                             if len(x) > 0 ]
 
 # [server]
 server = cfg.get('server', {})
