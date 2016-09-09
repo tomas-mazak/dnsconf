@@ -36,7 +36,9 @@ if config_file is None:
             break
 
 def boolean(string):
-    if string.lower() in ('yes', 'true', '1'):
+    if isinstance(string, bool):
+        return string
+    elif string.lower() in ('yes', 'true', '1'):
         return True
     elif string.lower() in ('no', 'false', '0'):
         return False
