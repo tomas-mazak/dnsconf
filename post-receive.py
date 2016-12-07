@@ -9,7 +9,8 @@
 #
 
 
-import os, subprocess
+import os, sys, subprocess
+import git
 
 from config import config
 
@@ -30,11 +31,20 @@ def notify(cmd):
 
 
 if __name__ == '__main__':
-   
-    if config['remote']['notify_servers']:
-        print "Updating master with command [%s] ..." % config['master']['update_cmd']
-        notify(config['master']['update_cmd'])
-        for name in config['slaves']:
-            cmd = config['slaves'][name]['update_cmd']
-            print "Updating slave %s with command [%s] ..." % (name, cmd)
-            notify(cmd)
+
+    for ref in sys.stdin:
+        (old, new, name) = ref.strip().split(' ')
+
+        # do not care about references other than deploy branch
+        if name != config['common']['deploy_ref']:
+            continue
+
+        if config['remote']['notify_servers']:
+            changed_files = git.changed_files(old, new)
+            print "Updating master with command [%s] ..." % config['master']['update_cmd']
+            notify(config['master']['update_cmd'])
+            for name in config['slaves']:
+                if config['slaves'][name]['conf'] in changed_files:
+                    cmd = config['slaves'][name]['update_cmd']
+                    print "Updating slave %s with command [%s] ..." % (name, cmd)
+                    notify(cmd)

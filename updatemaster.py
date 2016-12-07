@@ -9,7 +9,7 @@
 #
 
 
-import sys, os
+import sys, os, subprocess
 import git
 
 from config import config
@@ -19,7 +19,7 @@ def server_reload():
     """
     Reload DNS server. Currently BIND9 is supported
     """
-    cmd = ['rndc', 'reload']
+    cmd = ['/usr/sbin/rndc', 'reload']
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE,
                                  stderr=subprocess.PIPE)
     (stdout, stderr) = proc.communicate()
