@@ -14,13 +14,13 @@ import os, subprocess
 from config import config
 
 
-def notify(command):
-    cmd = [command]
+def notify(cmd):
     clean_env = {k: os.environ[k] for k in os.environ 
                                   if not k.startswith('GIT_')}
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE,
                                  stderr=subprocess.PIPE,
-                                 env=clean_env)
+                                 env=clean_env,
+                                 shell=True)
     (stdout, stderr) = proc.communicate()
     if proc.wait() != 0:
         raise RuntimeError(stdout + '\n' + stderr)
