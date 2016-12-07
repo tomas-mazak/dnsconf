@@ -10,7 +10,9 @@
 
 
 import os, sys
-import zoneparser, git, dnslib, config
+import zoneparser, git, dnslib
+
+from config import config
 
 
 if __name__ == '__main__':
@@ -19,7 +21,7 @@ if __name__ == '__main__':
         (old, new, name) = ref.strip().split(' ')
 
         # do not care about references other than deploy branch
-        if name != config.DEPLOY_REF:
+        if name != config['common']['deploy_ref']:
             continue
 
         # validate the changed zonefiles

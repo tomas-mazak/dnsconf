@@ -48,32 +48,20 @@ def boolean(string):
 
 parser = DictParser()
 parser.read(config_file)
-cfg = parser.as_dict()
+
+_config = parser.as_dict()
+config = {}
+servers = {}
+for key in _config:
+    if key.startswith('server:'):
+        servers[key[len('server:'):]] = _config[key]
+    else:
+        config[key] = _config[key]
+config['servers'] = servers
+config['client']['autoincrement_serial'] = boolean(config['client']['autoincrement_serial'])
+config['client']['update_conf'] = boolean(config['client']['update_conf'])
 
 
-# [common]
-common = cfg.get('common', {})
-ZONEDIR = common.get('zonefile_directory', 'zones')
-REMOTE_REF = common.get('remote_ref', 'refs/remotes/origin/master')
-DEPLOY_REF = common.get('deploy_ref', 'refs/heads/master')
-NAMEDCONF_MASTER = common.get('namedconf_master', None)
-NAMEDCONF_SLAVE = common.get('namedconf_slave', None)
-
-# [client]
-client = cfg.get('client', {})
-AUTOINCREMENT_SERIAL = boolean(client.get('autoincrement_serial', False))
-UPDATE_NAMEDCONF = boolean(client.get('autoincrement_serial', False))
-NAMEDCONF_MASTER_TPL = client.get('namedconf_master_tpl', None)
-NAMEDCONF_SLAVE_TPL = client.get('namedconf_slave_tpl', None)
-
-# [remote]
-remote = cfg.get('remote', {})
-NOTIFY_SERVERS = [ x.strip() for x in remote.get('notify_servers', '').split(',') 
-                             if len(x) > 0 ]
-
-# [server]
-server = cfg.get('server', {})
-SERVER_REPO_DIR = server.get('repo_dir', None)
-#SERVERTYPE = cfg.get('server', 'server_type')
-#CONFIG_TEMPLATE = cfg.get('server', 'config_template')
-#CONFIG_FILE = cfg.get('server', 'config_file')
+if __name__ == '__main__':
+    import pprint
+    pprint.pprint(config)

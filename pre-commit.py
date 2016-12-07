@@ -10,7 +10,9 @@
 
 
 import os, sys
-import git, dnslib, config
+import git, dnslib
+
+from config import config
 
 
 if __name__ == '__main__':
@@ -32,7 +34,7 @@ if __name__ == '__main__':
     if not zones_ok:
         sys.exit(1)
 
-    if config.AUTOINCREMENT_SERIAL:
+    if config['client']['autoincrement_serial']:
         for (sha1, fname) in modified:
             # update index
             zone_txt = git.content_by_sha1(sha1)
@@ -46,6 +48,6 @@ if __name__ == '__main__':
             with open(fname, 'w') as fd:
                 fd.write(zone_txt)
 
-    if config.UPDATE_NAMEDCONF:
+    if config['client']['update_conf']:
         zones = dnslib.get_all_index_zonefiles()
         dnslib.update_namedconf(zones, stage=True)

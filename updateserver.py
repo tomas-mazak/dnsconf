@@ -9,11 +9,13 @@
 #
 
 
-import os
-import git, dnslib, config
+import sys, os
+import git, dnslib
+
+from config import config
 
 
 if __name__ == '__main__':
-    os.chdir(config.SERVER_REPO_DIR)
+    os.chdir(config['servers'][sys.argv[1]]['repo_dir'])
     git.pull()
     dnslib.server_reload()

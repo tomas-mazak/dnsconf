@@ -10,10 +10,11 @@
 
 
 import os, subprocess
-import config
+
+from config import config
 
 
-def notify_local(command):
+def notify(command):
     cmd = [command]
     clean_env = {k: os.environ[k] for k in os.environ 
                                   if not k.startswith('GIT_')}
@@ -30,8 +31,5 @@ def notify_local(command):
 
 if __name__ == '__main__':
     
-    for server in config.NOTIFY_SERVERS:
-        if server.startswith('local:'):
-            notify_local(server[len('local:'):])
-        else:
-            raise NotImplementedError('%s: Server type not supported')
+    for name in config['servers']:
+        notify(config['servers'][name]['update_cmd'])

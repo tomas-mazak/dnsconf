@@ -7,15 +7,17 @@
 #
 
 
-import os, tempfile, subprocess, datetime
-import git, zoneparser, config
+import os, tempfile, subprocess, datetime, jinja2
+import git, zoneparser
+
+from config import config
 
 
 def file_to_zonename(filename):
     """
     Get the zone name based on zonefile file name
     """
-    zdir = os.path.join(config.ZONEDIR,'')
+    zdir = os.path.join(config['common']['zonedir'],'')
     return filename[len(zdir):]
 
 
@@ -23,7 +25,7 @@ def get_modified_zonefiles(old, new):
     """
     Get the list of zones modified between the two given commits
     """
-    zdir = os.path.join(config.ZONEDIR,'')
+    zdir = os.path.join(config['common']['zonedir'],'')
     return [f for f in git.changed_files(old, new) if f.startswith(zdir)]
 
 
@@ -31,14 +33,14 @@ def get_staged_zonefiles():
     """
     Get the list of zones modified in index (staged)
     """
-    return git.staged_files(subtree=config.ZONEDIR)
+    return git.staged_files(subtree=config['common']['zonedir'])
 
 
 def get_all_index_zonefiles():
     """
     Get the list of all zonefiles that exist in index
     """
-    return git.files_in_index(subtree=config.ZONEDIR)
+    return git.files_in_index(subtree=config['common']['zonedir'])
 
 
 def check_zone(name, zone_txt):
@@ -117,14 +119,11 @@ def update_serial(fname, zone_txt, serial=None):
     return (new_txt, serial)
 
 
-def _update_conf(template, dest, zones):
-    import jinja2
+def _update_conf(template, dest, zones, repo_dir):
     env = jinja2.Environment(loader=jinja2.FileSystemLoader('.'))
-
-    # master
     template = env.get_template(template)
-    zones = [ {'name': z[len(config.ZONEDIR)+1:], 
-               'file': os.path.join(config.SERVER_REPO_DIR, z)}
+    zones = [ {'name': z[len(config['common']['zonedir'])+1:], 
+               'file': os.path.join(repo_dir, z)}
               for z in sorted(zones) ]
     conf_txt = template.render(zones=zones)
     with open(dest, 'w') as fd:
@@ -135,8 +134,8 @@ def update_namedconf(zones, stage=False):
     """
     Regenerate server configs from templates
     """
-    _update_conf(config.NAMEDCONF_MASTER_TPL, config.NAMEDCONF_MASTER, zones)
-    _update_conf(config.NAMEDCONF_SLAVE_TPL, config.NAMEDCONF_SLAVE, zones)
-    if stage:
-        git.stage_file(config.NAMEDCONF_MASTER)
-        git.stage_file(config.NAMEDCONF_SLAVE)
+    servers = config['servers']
+    for name in config['servers']:
+        _update_conf(servers[name]['conf_tpl'], servers[name]['conf'], zones, servers[name]['repo_dir'])
+        if stage:
+            git.stage_file(servers[name]['conf'])

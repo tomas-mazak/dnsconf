@@ -69,7 +69,12 @@ def content_by_commit_and_name(commit, name):
     """
     Get the contents of a file in particular commit
     """
-    return _git('show %s:%s' % (commit, name))
+    try:
+        return _git('show %s:%s' % (commit, name))
+    except RuntimeError as ex:
+        if 'does not exist in' in ex.message:
+            return ''
+        else: raise
 
 
 def add_object(content):
@@ -131,6 +136,8 @@ def changed_files(old, new, subtree='.'):
     """
     Get a list of files modified between the two given commits
     """
+    if old == '0000000000000000000000000000000000000000':
+        old = '4b825dc642cb6eb9a060e54bf8d69288fbee4904'
     output = _git('diff --name-only %s..%s -- %s' % (old, new, subtree))
     files = output.strip().split('\n')
 
