@@ -30,8 +30,11 @@ def notify(cmd):
 
 
 if __name__ == '__main__':
-    
-    for name in config['servers']:
-        cmd = config['servers'][name]['update_cmd']
-        print "Notifying server %s with command [%s] ..." % (name, cmd)
-        notify(cmd)
+   
+    if config['remote']['notify_servers']:
+        print "Updating master with command [%s] ..." % config['master']['update_cmd']
+        notify(config['master']['update_cmd'])
+        for name in config['slaves']:
+            cmd = config['slaves'][name]['update_cmd']
+            print "Updating slave %s with command [%s] ..." % (name, cmd)
+            notify(cmd)

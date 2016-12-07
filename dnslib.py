@@ -62,18 +62,6 @@ def check_zone(name, zone_txt):
             return True
 
 
-def server_reload():
-    """
-    Reload DNS server. Currently BIND9 is supported
-    """
-    cmd = ['rndc', 'reload']
-    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE,
-                                 stderr=subprocess.PIPE)
-    (stdout, stderr) = proc.communicate()
-    if proc.wait() != 0:
-        raise RuntimeError(stdout + '\n' + stderr)
-        
-
 def increment_serial(old_value):
     """
     Get the standard format zone serial for the current date (YYYYMMDD01)
@@ -135,8 +123,9 @@ def update_namedconf(zones, stage=False):
     """
     Regenerate server configs from templates
     """
-    servers = config['servers']
-    for name in config['servers']:
+    servers = dict(config['slaves'])
+    servers['_master'] = config['master']
+    for name in servers:
         _update_conf(servers[name]['conf_tpl'], servers[name]['conf'], zones, servers[name]['repo_dir'])
         if stage:
             git.stage_file(servers[name]['conf'])

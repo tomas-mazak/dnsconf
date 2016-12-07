@@ -51,17 +51,20 @@ parser.read(config_file)
 
 _config = parser.as_dict()
 config = {}
-servers = {}
+slaves = {}
 for key in _config:
-    if key.startswith('server:'):
-        servers[key[len('server:'):]] = _config[key]
+    if key.startswith('slave:'):
+        slaves[key[len('slave:'):]] = _config[key]
     else:
         config[key] = _config[key]
-config['servers'] = servers
+config['slaves'] = slaves
 config['client']['autoincrement_serial'] = boolean(config['client']['autoincrement_serial'])
 config['client']['update_conf'] = boolean(config['client']['update_conf'])
+config['remote']['notify_servers'] = boolean(config['remote']['notify_servers'])
 
 
 if __name__ == '__main__':
     import pprint
+    print "Loading configuration from %s ..." % config_file
+    print
     pprint.pprint(config)
