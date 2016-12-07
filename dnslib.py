@@ -50,7 +50,7 @@ def check_zone(name, zone_txt):
     with tempfile.NamedTemporaryFile('w') as tmp:
         tmp.write(zone_txt)
         tmp.flush()
-        cmd = ['named-checkzone', name, tmp.name]
+        cmd = ['/usr/sbin/named-checkzone', name, tmp.name]
         proc = subprocess.Popen(cmd, stdout=subprocess.PIPE,
                                      stderr=subprocess.PIPE)
         (stdout, stderr) = proc.communicate()
