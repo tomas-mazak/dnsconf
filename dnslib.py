@@ -7,7 +7,7 @@
 #
 
 
-import os, tempfile, subprocess, datetime, jinja2
+import os, tempfile, subprocess, datetime
 import git, zoneparser
 
 from config import config
@@ -120,6 +120,7 @@ def update_serial(fname, zone_txt, serial=None):
 
 
 def _update_conf(template, dest, zones, repo_dir):
+    import jinja2
     env = jinja2.Environment(loader=jinja2.FileSystemLoader('.'))
     template = env.get_template(template)
     zones = [ {'name': z[len(config['common']['zonedir'])+1:], 
