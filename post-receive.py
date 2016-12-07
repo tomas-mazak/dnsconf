@@ -32,4 +32,6 @@ def notify(cmd):
 if __name__ == '__main__':
     
     for name in config['servers']:
-        notify(config['servers'][name]['update_cmd'])
+        cmd = config['servers'][name]['update_cmd']
+        print "Notifying server %s with command [%s] ..." % (name, cmd)
+        notify(cmd)
