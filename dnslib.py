@@ -42,6 +42,20 @@ def get_all_index_zonefiles():
     """
     return git.files_in_index(subtree=config['common']['zonedir'])
 
+def get_executable_path(exe):
+    """
+    Find a path to an executable. Ensure to look in the "root" $PATH as well, even if run
+    as unprivileged user
+    """
+    dirs = ['/usr/local/sbin', '/usr/sbin', '/sbin']
+    dirs.extend(os.getenv('PATH').split(':'))
+
+    for d in dirs:
+        path = os.path.join(d, exe)
+        if os.path.exists(path):
+            return path
+
+    raise RuntimeError('Executable %s not found!' % exe)
 
 def check_zone(name, zone_txt):
     """
@@ -50,7 +64,7 @@ def check_zone(name, zone_txt):
     with tempfile.NamedTemporaryFile('w') as tmp:
         tmp.write(zone_txt)
         tmp.flush()
-        cmd = ['/usr/sbin/named-checkzone', name, tmp.name]
+        cmd = [get_executable_path('named-checkzone'), name, tmp.name]
         proc = subprocess.Popen(cmd, stdout=subprocess.PIPE,
                                      stderr=subprocess.PIPE)
         (stdout, stderr) = proc.communicate()
